@@ -15,18 +15,19 @@ namespace CropViewToRoom
   [Transaction( TransactionMode.Manual )]
   public class Command : IExternalCommand
   {
-    public void CropAroundRoom( Autodesk.Revit.DB.Architecture.Room room, Autodesk.Revit.DB.View view ) //This provides the required shape now how to combine with the offset and tie into wall thickness
+    #region Code by Stephen Harrison
+    public void CropAroundRoom( Room room, View view ) //This provides the required shape now how to combine with the offset and tie into wall thickness
     {
       if( view != null )
       {
-        IList<IList<Autodesk.Revit.DB.BoundarySegment>> segments = room.GetBoundarySegments( new SpatialElementBoundaryOptions() );
+        IList<IList<BoundarySegment>> segments = room.GetBoundarySegments( new SpatialElementBoundaryOptions() );
 
         if( null != segments )  //the room may not be bound
         {
-          foreach( IList<Autodesk.Revit.DB.BoundarySegment> segmentList in segments )
+          foreach( IList<BoundarySegment> segmentList in segments )
           {
             CurveLoop loop = new CurveLoop();
-            foreach( Autodesk.Revit.DB.BoundarySegment boundarySegment in segmentList )
+            foreach( BoundarySegment boundarySegment in segmentList )
             {
               List<XYZ> points = boundarySegment.GetCurve().Tessellate().ToList();
               for( int ip = 0; ip < points.Count - 1; ip++ )
@@ -47,19 +48,19 @@ namespace CropViewToRoom
       }
     }
 
-    public void CropAroundRoomWithOffset( Autodesk.Revit.DB.Architecture.Room room, Autodesk.Revit.DB.View view )
+    public void CropAroundRoomWithOffset( Room room, View view )
     {
       List<XYZ> points = new List<XYZ>();
       if( view != null )
       {
-        IList<IList<Autodesk.Revit.DB.BoundarySegment>> segments = room.GetBoundarySegments( new SpatialElementBoundaryOptions() );
+        IList<IList<BoundarySegment>> segments = room.GetBoundarySegments( new SpatialElementBoundaryOptions() );
 
         if( null != segments )
         {
-          foreach( IList<Autodesk.Revit.DB.BoundarySegment> segmentList in segments )
+          foreach( IList<BoundarySegment> segmentList in segments )
           {
             CurveLoop loop = new CurveLoop();
-            foreach( Autodesk.Revit.DB.BoundarySegment boundarySegment in segmentList )
+            foreach( BoundarySegment boundarySegment in segmentList )
             {
               points.AddRange( boundarySegment.GetCurve().Tessellate() );
             }
@@ -103,6 +104,8 @@ namespace CropViewToRoom
       CurveLoop curveLoop2 = CurveLoop.CreateViaOffset( curveLoop, offset, normal );
       return curveLoop2.Select<Curve, XYZ>( c => c.GetEndPoint( 0 ) );
     }
+    #endregion // Code by Stephen Harrison
+
 
     public Result Execute(
       ExternalCommandData commandData,
@@ -113,6 +116,9 @@ namespace CropViewToRoom
       UIDocument uidoc = uiapp.ActiveUIDocument;
       Application app = uiapp.Application;
       Document doc = uidoc.Document;
+
+      SpatialElementBoundaryOptions seb_opt
+        = new SpatialElementBoundaryOptions();
 
       FilteredElementCollector levels
         = new FilteredElementCollector( doc )
@@ -151,9 +157,44 @@ namespace CropViewToRoom
 
             view_cropped.Name = view_name;
 
-            view_cropped.CropBoxVisible = true;
-            view_cropped.CropBoxActive = true;
-            CropAroundRoom( room, view_cropped );
+            IList<IList<BoundarySegment>> sloops
+              = room.GetBoundarySegments( seb_opt );
+
+            if( null == sloops ) // the room may not be bound
+            {
+              continue;
+            }
+
+            CurveLoop loop = null;
+
+            foreach( IList<BoundarySegment> sloop in sloops )
+            {
+              loop = new CurveLoop();
+
+              foreach( BoundarySegment s in sloop )
+              {
+                loop.Append( s.GetCurve() );
+              }
+
+              // Skip out after first sloop - ignore
+              // rooms with holes and disjunct parts
+
+              break;
+            }
+
+            ViewCropRegionShapeManager vcrs_mgr 
+              = view_cropped.GetCropRegionShapeManager();
+
+            bool valid = vcrs_mgr
+              .IsCropRegionShapeValid( loop );
+
+            if( valid )
+            {
+              view_cropped.CropBoxVisible = true;
+              view_cropped.CropBoxActive = true;
+
+              vcrs_mgr.SetCropShape( loop );
+            }
           }
         }
         tx.Commit();
