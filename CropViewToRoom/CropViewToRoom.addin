@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+  <AddIn Type="Command">
+    <Text>Crop View to Room</Text>
+    <Description>For each level, collect all rooms and generate views cropped to each room</Description>
+    <Assembly>CropViewToRoom.dll</Assembly>
+    <FullClassName>CropViewToRoom.Command</FullClassName>
+    <ClientId>406b4908-83ed-42d3-b007-4c4e2651c5e4</ClientId>
+    <VendorId>com.typepad.thebuildingcoder</VendorId>
+    <VendorDescription>The Building Coder, http://thebuildingcoder.typepad.com</VendorDescription>
+  </AddIn>
+</RevitAddIns>
