@@ -1,12 +1,11 @@
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle( "CropViewToRoom" )]
-[assembly: AssemblyDescription( "Revit Add-In Description for CropViewToRoom" )]
+[assembly: AssemblyDescription( "Revit .NET Add-In that, for each level, collects all rooms and generates views cropped to each room" )]
 [assembly: AssemblyConfiguration( "" )]
 [assembly: AssemblyCompany( "Autodesk Inc." )]
 [assembly: AssemblyProduct( "CropViewToRoom Revit C# .NET Add-In" )]

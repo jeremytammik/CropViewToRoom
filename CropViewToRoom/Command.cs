@@ -154,7 +154,6 @@ namespace CropViewToRoom
             view_cropped.CropBoxVisible = true;
             view_cropped.CropBoxActive = true;
             CropAroundRoom( room, view_cropped );
-
           }
         }
         tx.Commit();
