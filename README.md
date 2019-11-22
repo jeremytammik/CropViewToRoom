@@ -2,7 +2,7 @@
 
 Revit C# .NET add-in that, for each level, collects all rooms and generates views cropped to each room, to address
 the [Revit API discussion forum](http://forums.autodesk.com/t5/revit-api-forum/bd-p/160) threads
-on [generating views from Rooms](https://forums.autodesk.com/t5/revit-api-forum/generate-views-from-rooms/m-p/9144449)
+on [generating views from rooms](https://forums.autodesk.com/t5/revit-api-forum/generate-views-from-rooms/m-p/9144449)
 and [CreateViaOffset](https://forums.autodesk.com/t5/revit-api-forum/createviaoffset/m-p/9159500).
 
 
