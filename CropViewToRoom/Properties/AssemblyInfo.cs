@@ -31,5 +31,12 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion( "2020.0.0.0" )]
-[assembly: AssemblyFileVersion( "2020.0.0.0" )]
+//
+// History:
+//
+// 2019-11-22 2020.0.0.0 successful test with zero offset
+// 2019-12-04 2020.0.0.1 integrated two updates by Stephen
+// 2019-12-12 2020.0.0.2 integrated new code and sample models by Stephen from new thread https://forums.autodesk.com/t5/revit-api-forum/createviaoffset-curveloop-original-ilist-lt-double-gt/m-p/9199151
+//
+[assembly: AssemblyVersion( "2020.0.0.2" )]
+[assembly: AssemblyFileVersion( "2020.0.0.2" )]
