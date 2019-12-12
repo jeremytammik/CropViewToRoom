@@ -38,6 +38,7 @@ using System.Runtime.InteropServices;
 // 2019-12-04 2020.0.0.1 integrated two updates by Stephen
 // 2019-12-12 2020.0.0.2 integrated new code and sample models by Stephen from new thread https://forums.autodesk.com/t5/revit-api-forum/createviaoffset-curveloop-original-ilist-lt-double-gt/m-p/9199151
 // 2019-12-12 2020.0.0.3 implemented CreateModelCurves
+// 2019-12-12 2020.0.0.4 implemented debug output of curve lengths and wall thicknesses
 //
-[assembly: AssemblyVersion( "2020.0.0.3" )]
-[assembly: AssemblyFileVersion( "2020.0.0.3" )]
+[assembly: AssemblyVersion( "2020.0.0.4" )]
+[assembly: AssemblyFileVersion( "2020.0.0.4" )]

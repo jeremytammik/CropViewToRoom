@@ -123,6 +123,20 @@ namespace CropViewToRoom
               break;
             }
 
+            int n = loop.Count();
+            string slength = string.Join( ",",
+              loop.Select<Curve, string>(
+                c => c.Length.ToString( "#.##" ) ) );
+
+            int m = wallthicknessList.Count();
+            string sthickness = string.Join( ",",
+              wallthicknessList.Select<double, string>( 
+                d => d.ToString( "#.##" ) ) );
+
+            Debug.Print( 
+              "{0} curves with lengths {1} and {2} thicknesses {3}",
+              n, slength, m, sthickness );
+
             CreateModelCurves( view_cropped, loop );
 
             CurveLoop loop2 = CurveLoop.CreateViaOffset(
