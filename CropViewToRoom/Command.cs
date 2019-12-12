@@ -15,6 +15,24 @@ namespace CropViewToRoom
   [Transaction( TransactionMode.Manual )]
   public class Command : IExternalCommand
   {
+    /// <summary>
+    /// Offset view crop box by an additional x feet.
+    /// </summary>
+    const double _additional_offset = 0.1;
+
+    void CreateModelCurves(
+      View view,
+      CurveLoop loop )
+    {
+      Document doc = view.Document;
+      SketchPlane sp = view.SketchPlane;
+
+      foreach( Curve curve in loop )
+      {
+        doc.Create.NewModelCurve( curve, sp );
+      }
+    }
+    
     public Result Execute(
       ExternalCommandData commandData,
       ref string message,
@@ -75,12 +93,15 @@ namespace CropViewToRoom
             }
 
             CurveLoop loop = null;
+
             foreach( IList<BoundarySegment> sloop in sloops )
             {
               loop = new CurveLoop();
+
               foreach( BoundarySegment s in sloop )
               {
                 loop.Append( s.GetCurve() );
+
                 ElementType type = doc.GetElement( 
                   s.ElementId ) as ElementType;
 
@@ -102,35 +123,40 @@ namespace CropViewToRoom
               break;
             }
 
+            CreateModelCurves( view_cropped, loop );
+
             CurveLoop loop2 = CurveLoop.CreateViaOffset(
               loop, wallthicknessList, normal );
 
-            CurveLoop newloop = new CurveLoop();
+            CreateModelCurves( view_cropped, loop2 );
 
-            foreach( Curve curve in loop2 )
-            {
-              IList<XYZ> points = curve.Tessellate();
+            //CurveLoop newloop = new CurveLoop();
 
-              for( int ip = 0; ip < points.Count - 1; ip++ )
-              {
-                Line l = Line.CreateBound( 
-                  points[ ip ], points[ ip + 1 ] );
+            //foreach( Curve curve in loop2 )
+            //{
+              
+            //  IList<XYZ> points = curve.Tessellate();
 
-                newloop.Append( l );
-              }
-            }
-            ViewCropRegionShapeManager vcrs_mgr 
-              = view_cropped.GetCropRegionShapeManager();
+            //  for( int ip = 0; ip < points.Count - 1; ip++ )
+            //  {
+            //    Line l = Line.CreateBound( 
+            //      points[ ip ], points[ ip + 1 ] );
 
-            bool valid = vcrs_mgr.IsCropRegionShapeValid( 
-              newloop );
+            //    newloop.Append( l );
+            //  }
+            //}
+            //ViewCropRegionShapeManager vcrs_mgr 
+            //  = view_cropped.GetCropRegionShapeManager();
 
-            if( valid )
-            {
-              view_cropped.CropBoxVisible = true;
-              view_cropped.CropBoxActive = true;
-              vcrs_mgr.SetCropShape( newloop );
-            }
+            //bool valid = vcrs_mgr.IsCropRegionShapeValid( 
+            //  newloop );
+
+            //if( valid )
+            //{
+            //  view_cropped.CropBoxVisible = true;
+            //  view_cropped.CropBoxActive = true;
+            //  vcrs_mgr.SetCropShape( newloop );
+            //}
           }
         }
         tx.Commit();
