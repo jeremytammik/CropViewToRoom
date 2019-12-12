@@ -32,7 +32,7 @@ namespace CropViewToRoom
         doc.Create.NewModelCurve( curve, sp );
       }
     }
-    
+
     public Result Execute(
       ExternalCommandData commandData,
       ref string message,
@@ -44,11 +44,17 @@ namespace CropViewToRoom
       Document doc = uidoc.Document;
       IList<double> wallthicknessList = new List<double>();
       XYZ normal = XYZ.BasisZ;
+      bool flip_normal = true;
+
+      if( flip_normal )
+      {
+        normal = -normal;
+      }
 
       SpatialElementBoundaryOptions seb_opt
         = new SpatialElementBoundaryOptions();
 
-      FilteredElementCollector levels 
+      FilteredElementCollector levels
         = new FilteredElementCollector( doc )
           .OfClass( typeof( Level ) );
 
@@ -63,7 +69,7 @@ namespace CropViewToRoom
           ElementId id_view = level.FindAssociatedPlanViewId();
           ViewPlan view = doc.GetElement( id_view ) as ViewPlan;
 
-          IEnumerable<Room> rooms 
+          IEnumerable<Room> rooms
             = new FilteredElementCollector( doc, id_view )
               .OfClass( typeof( SpatialElement ) )
               .Where<Element>( e => e is Room )
@@ -72,19 +78,19 @@ namespace CropViewToRoom
           foreach( Room room in rooms )
           {
             wallthicknessList.Clear();
-            string view_name = string.Format( 
-              "{0}_cropped_to_room_{1}_date_{2}", 
+            string view_name = string.Format(
+              "{0}_cropped_to_room_{1}_date_{2}",
               view.Name, room.Name, date_iso );
 
-            id_view = view.Duplicate( 
+            id_view = view.Duplicate(
               ViewDuplicateOption.AsDependent );
 
-            View view_cropped = doc.GetElement( 
+            View view_cropped = doc.GetElement(
               id_view ) as View;
 
             view_cropped.Name = view_name;
 
-            IList<IList<BoundarySegment>> sloops 
+            IList<IList<BoundarySegment>> sloops
               = room.GetBoundarySegments( seb_opt );
 
             if( null == sloops ) // the room may not be bounded
@@ -102,7 +108,7 @@ namespace CropViewToRoom
               {
                 loop.Append( s.GetCurve() );
 
-                ElementType type = doc.GetElement( 
+                ElementType type = doc.GetElement(
                   s.ElementId ) as ElementType;
 
                 Element elem = doc.GetElement( s.ElementId );
@@ -130,10 +136,10 @@ namespace CropViewToRoom
 
             int m = wallthicknessList.Count();
             string sthickness = string.Join( ",",
-              wallthicknessList.Select<double, string>( 
+              wallthicknessList.Select<double, string>(
                 d => d.ToString( "#.##" ) ) );
 
-            Debug.Print( 
+            Debug.Print(
               "{0} curves with lengths {1} and {2} thicknesses {3}",
               n, slength, m, sthickness );
 
@@ -148,7 +154,7 @@ namespace CropViewToRoom
 
             //foreach( Curve curve in loop2 )
             //{
-              
+
             //  IList<XYZ> points = curve.Tessellate();
 
             //  for( int ip = 0; ip < points.Count - 1; ip++ )
