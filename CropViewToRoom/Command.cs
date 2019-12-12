@@ -44,6 +44,7 @@ namespace CropViewToRoom
           Debug.Print( level.Name );
           ElementId id_view = level.FindAssociatedPlanViewId();
           ViewPlan view = doc.GetElement( id_view ) as ViewPlan;
+
           IEnumerable<Room> rooms 
             = new FilteredElementCollector( doc, id_view )
               .OfClass( typeof( SpatialElement ) )
@@ -57,16 +58,22 @@ namespace CropViewToRoom
               "{0}_cropped_to_room_{1}_date_{2}", 
               view.Name, room.Name, date_iso );
 
-            id_view = view.Duplicate( ViewDuplicateOption.AsDependent );
-            View view_cropped = doc.GetElement( id_view ) as View;
+            id_view = view.Duplicate( 
+              ViewDuplicateOption.AsDependent );
+
+            View view_cropped = doc.GetElement( 
+              id_view ) as View;
+
             view_cropped.Name = view_name;
+
             IList<IList<BoundarySegment>> sloops 
               = room.GetBoundarySegments( seb_opt );
 
-            if( null == sloops ) // the room may not be bound
+            if( null == sloops ) // the room may not be bounded
             {
               continue;
             }
+
             CurveLoop loop = null;
             foreach( IList<BoundarySegment> sloop in sloops )
             {
@@ -94,10 +101,12 @@ namespace CropViewToRoom
               // rooms with holes and disjunct parts
               break;
             }
+
             CurveLoop loop2 = CurveLoop.CreateViaOffset(
               loop, wallthicknessList, normal );
 
             CurveLoop newloop = new CurveLoop();
+
             foreach( Curve curve in loop2 )
             {
               IList<XYZ> points = curve.Tessellate();
