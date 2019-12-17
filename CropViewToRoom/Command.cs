@@ -20,6 +20,11 @@ namespace CropViewToRoom
     /// </summary>
     const double _additional_offset = 0.1;
 
+    /// <summary>
+    /// Multiply wall width by specific factor.
+    /// </summary>
+    const double _wall_width_factor = 1.1;
+
     void CreateModelCurves(
       View view,
       CurveLoop loop )
@@ -111,18 +116,14 @@ namespace CropViewToRoom
                 ElementType type = doc.GetElement(
                   s.ElementId ) as ElementType;
 
-                Element elem = doc.GetElement( s.ElementId );
-                if( elem is Wall )
-                {
-                  Wall wall = elem as Wall;
-                  wallthicknessList.Add( wall.Width + 0.1 );
-                }
-                else
-                {
-                  //Room separator
-                  //Any other exceptions to walls need including??
-                  wallthicknessList.Add( 0.1 );
-                }
+                Element e = doc.GetElement( s.ElementId );
+
+                double thickness = (e is Wall)
+                  ? (e as Wall).Width
+                  : 0; // Room separator; any other exceptions need including??
+
+                wallthicknessList.Add( thickness 
+                  * _wall_width_factor );
               }
               // Skip out after first sloop - ignore
               // rooms with holes and disjunct parts
