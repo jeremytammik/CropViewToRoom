@@ -23,7 +23,7 @@ namespace CropViewToRoom
     /// <summary>
     /// Multiply wall width by specific factor.
     /// </summary>
-    const double _wall_width_factor = 1.1;
+    static double _wall_width_factor = 0.1;
 
     void CreateModelCurves(
       View view,
@@ -38,6 +38,84 @@ namespace CropViewToRoom
       }
     }
 
+    CurveLoop GetOuterLoopOfRoomFromCreateViaOffset( 
+      View view,
+      IList<IList<BoundarySegment>> sloops )
+    {
+      Document doc = view.Document;
+
+      CurveLoop loop = null;
+      IList<double> wallthicknessList = new List<double>();
+
+      foreach( IList<BoundarySegment> sloop in sloops )
+      {
+        loop = new CurveLoop();
+
+        foreach( BoundarySegment s in sloop )
+        {
+          loop.Append( s.GetCurve() );
+
+          ElementType type = doc.GetElement(
+            s.ElementId ) as ElementType;
+
+          Element e = doc.GetElement( s.ElementId );
+
+          double thickness = (e is Wall)
+            ? (e as Wall).Width
+            : 0; // Room separator; any other exceptions need including??
+
+          wallthicknessList.Add( thickness
+            * _wall_width_factor );
+        }
+        // Skip out after first sloop - ignore
+        // rooms with holes and disjunct parts
+        break;
+      }
+
+      int n = loop.Count();
+      string slength = string.Join( ",",
+        loop.Select<Curve, string>(
+          c => c.Length.ToString( "#.##" ) ) );
+
+      int m = wallthicknessList.Count();
+      string sthickness = string.Join( ",",
+        wallthicknessList.Select<double, string>(
+          d => d.ToString( "#.##" ) ) );
+
+      Debug.Print(
+        "{0} curves with lengths {1} and {2} thicknesses {3}",
+        n, slength, m, sthickness );
+
+      CreateModelCurves( view, loop );
+
+      bool flip_normal = true;
+
+      XYZ normal = flip_normal ? -XYZ.BasisZ : XYZ.BasisZ;
+
+      CurveLoop room_outer_loop = CurveLoop.CreateViaOffset(
+        loop, wallthicknessList, normal );
+
+      CreateModelCurves( view, room_outer_loop );
+
+      //CurveLoop newloop = new CurveLoop();
+
+      //foreach( Curve curve in loop2 )
+      //{
+
+      //  IList<XYZ> points = curve.Tessellate();
+
+      //  for( int ip = 0; ip < points.Count - 1; ip++ )
+      //  {
+      //    Line l = Line.CreateBound( 
+      //      points[ ip ], points[ ip + 1 ] );
+
+      //    newloop.Append( l );
+      //  }
+      //}
+
+      return room_outer_loop;
+    }
+
     public Result Execute(
       ExternalCommandData commandData,
       ref string message,
@@ -47,14 +125,6 @@ namespace CropViewToRoom
       UIDocument uidoc = uiapp.ActiveUIDocument;
       Application app = uiapp.Application;
       Document doc = uidoc.Document;
-      IList<double> wallthicknessList = new List<double>();
-      XYZ normal = XYZ.BasisZ;
-      bool flip_normal = true;
-
-      if( flip_normal )
-      {
-        normal = -normal;
-      }
 
       SpatialElementBoundaryOptions seb_opt
         = new SpatialElementBoundaryOptions();
@@ -69,7 +139,6 @@ namespace CropViewToRoom
         string date_iso = DateTime.Now.ToString( "yyyy-MM-dd" );
         foreach( Level level in levels )
         {
-          wallthicknessList.Clear();
           Debug.Print( level.Name );
           ElementId id_view = level.FindAssociatedPlanViewId();
           ViewPlan view = doc.GetElement( id_view ) as ViewPlan;
@@ -82,7 +151,6 @@ namespace CropViewToRoom
 
           foreach( Room room in rooms )
           {
-            wallthicknessList.Clear();
             string view_name = string.Format(
               "{0}_cropped_to_room_{1}_date_{2}",
               view.Name, room.Name, date_iso );
@@ -103,80 +171,21 @@ namespace CropViewToRoom
               continue;
             }
 
-            CurveLoop loop = null;
+            CurveLoop room_outer_loop
+              = GetOuterLoopOfRoomFromCreateViaOffset( 
+                view_cropped, sloops );
 
-            foreach( IList<BoundarySegment> sloop in sloops )
-            {
-              loop = new CurveLoop();
-
-              foreach( BoundarySegment s in sloop )
-              {
-                loop.Append( s.GetCurve() );
-
-                ElementType type = doc.GetElement(
-                  s.ElementId ) as ElementType;
-
-                Element e = doc.GetElement( s.ElementId );
-
-                double thickness = (e is Wall)
-                  ? (e as Wall).Width
-                  : 0; // Room separator; any other exceptions need including??
-
-                wallthicknessList.Add( thickness 
-                  * _wall_width_factor );
-              }
-              // Skip out after first sloop - ignore
-              // rooms with holes and disjunct parts
-              break;
-            }
-
-            int n = loop.Count();
-            string slength = string.Join( ",",
-              loop.Select<Curve, string>(
-                c => c.Length.ToString( "#.##" ) ) );
-
-            int m = wallthicknessList.Count();
-            string sthickness = string.Join( ",",
-              wallthicknessList.Select<double, string>(
-                d => d.ToString( "#.##" ) ) );
-
-            Debug.Print(
-              "{0} curves with lengths {1} and {2} thicknesses {3}",
-              n, slength, m, sthickness );
-
-            CreateModelCurves( view_cropped, loop );
-
-            CurveLoop loop2 = CurveLoop.CreateViaOffset(
-              loop, wallthicknessList, normal );
-
-            CreateModelCurves( view_cropped, loop2 );
-
-            //CurveLoop newloop = new CurveLoop();
-
-            //foreach( Curve curve in loop2 )
-            //{
-
-            //  IList<XYZ> points = curve.Tessellate();
-
-            //  for( int ip = 0; ip < points.Count - 1; ip++ )
-            //  {
-            //    Line l = Line.CreateBound( 
-            //      points[ ip ], points[ ip + 1 ] );
-
-            //    newloop.Append( l );
-            //  }
-            //}
             //ViewCropRegionShapeManager vcrs_mgr 
             //  = view_cropped.GetCropRegionShapeManager();
 
             //bool valid = vcrs_mgr.IsCropRegionShapeValid( 
-            //  newloop );
+            //  room_outer_loop );
 
             //if( valid )
             //{
             //  view_cropped.CropBoxVisible = true;
             //  view_cropped.CropBoxActive = true;
-            //  vcrs_mgr.SetCropShape( newloop );
+            //  vcrs_mgr.SetCropShape( room_outer_loop );
             //}
           }
         }

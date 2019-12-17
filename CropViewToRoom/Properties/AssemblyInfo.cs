@@ -40,6 +40,7 @@ using System.Runtime.InteropServices;
 // 2019-12-12 2020.0.0.3 implemented CreateModelCurves
 // 2019-12-12 2020.0.0.4 implemented debug output of curve lengths and wall thicknesses
 // 2019-12-17 2020.0.0.5 implemented wall thicknesses factor
+// 2019-12-17 2020.0.0.6 implemented GetOuterLoopOfRoomFromCreateViaOffset
 //
-[assembly: AssemblyVersion( "2020.0.0.5" )]
-[assembly: AssemblyFileVersion( "2020.0.0.5" )]
+[assembly: AssemblyVersion( "2020.0.0.6" )]
+[assembly: AssemblyFileVersion( "2020.0.0.6" )]
