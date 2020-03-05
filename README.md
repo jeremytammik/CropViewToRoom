@@ -5,6 +5,8 @@ the [Revit API discussion forum](http://forums.autodesk.com/t5/revit-api-forum/b
 on [generating views from rooms](https://forums.autodesk.com/t5/revit-api-forum/generate-views-from-rooms/m-p/9144449)
 and [CreateViaOffset](https://forums.autodesk.com/t5/revit-api-forum/createviaoffset/m-p/9159500).
 
+Some important additional aspects of determining and the required outer room outline geometry are addressed by
+the [ElementOutline companion add-in](https://github.com/jeremytammik/ElementOutline).
 
 ## Author
 
