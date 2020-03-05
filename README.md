@@ -8,6 +8,8 @@ and [CreateViaOffset](https://forums.autodesk.com/t5/revit-api-forum/createviaof
 Some important additional aspects of determining and the required outer room outline geometry are addressed by
 the [ElementOutline companion add-in](https://github.com/jeremytammik/ElementOutline).
 
+<img src="img/room_separator_using_2d_booleans.png" alt="Room outline" title="Room outline" width="500"/> <!-- 1206 -->
+
 ## Author
 
 Jeremy Tammik, [The Building Coder](http://thebuildingcoder.typepad.com), [ADN](http://www.autodesk.com/adn) [Open](http://www.autodesk.com/adnopen), [Autodesk Inc.](http://www.autodesk.com)
